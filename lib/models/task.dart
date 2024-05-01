@@ -1,18 +1,9 @@
-// Taskクラスにpriorityプロパティを追加し、Comparableを実装する
-class Task implements Comparable<Task> {
+// lib/models/task.dart
+
+class Task {
   final String name;
-  bool isCompleted; // late修飾子を削除
-  final int priority; // 優先順位を表すプロパティ
+  bool isCompleted;
+  final int priority;
 
-  Task({
-    required this.name,
-    this.isCompleted = false, // デフォルトの初期値を設定
-    required this.priority,
-  });
-
-  // compareToメソッドをオーバーライドして優先順位で比較する
-  @override
-  int compareTo(Task other) {
-    return priority.compareTo(other.priority);
-  }
+  Task({required this.name, required this.isCompleted, required this.priority});
 }
