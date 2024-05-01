@@ -1,3 +1,5 @@
+// lib/screens/todo_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
@@ -5,29 +7,19 @@ import '../widgets/task_tile.dart';
 import 'add_task_screen.dart';
 
 class ToDoScreen extends StatelessWidget {
-  const ToDoScreen({super.key});
+  const ToDoScreen({Key? key});
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      // タブの数を指定
       length: 2,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('ToDo App'),
-          /*actions: [
-            IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () {
-                // ハンバーガーメニューがタップされたときにDrawerを開く
-                Scaffold.of(context).openDrawer();
-              },
-            ),
-          ],*/
           bottom: const TabBar(
             tabs: [
-              Tab(text: '実行中タスク'), // タブ1: 実行中タスク
-              Tab(text: '完了タスク'),   // タブ2: 完了タスク
+              Tab(text: '実行中タスク'),
+              Tab(text: '完了タスク'),
             ],
           ),
         ),
@@ -61,17 +53,17 @@ class ToDoScreen extends StatelessWidget {
             ],
           ),
         ),
+
         body: TabBarView(
           children: [
             _buildTaskList(context, false), // 実行中タスクのリストを表示
-            _buildTaskList(context, true),  // 完了タスクのリストを表示
+            _buildTaskList(context, true), // 完了タスクのリストを表示
           ],
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             Navigator.push(
               context,
-              // 新しいタスクを追加する画面に遷移
               MaterialPageRoute(builder: (context) => AddTaskScreen()),
             );
           },
@@ -81,25 +73,23 @@ class ToDoScreen extends StatelessWidget {
     );
   }
 
-    // タスクリストを表示するウィジェット
+  // タスクリストを表示するウィジェット
   Widget _buildTaskList(BuildContext context, bool completed) {
     final taskProvider = Provider.of<TaskProvider>(context);
-    // 実行中タスクか完了タスクかでフィルタリング
-    final tasks = taskProvider.tasks.where((task) => task.isCompleted == completed).toList();
+    final tasks =
+    taskProvider.tasks.where((task) => task.isCompleted == completed).toList();
 
-    // タスクを優先順位でソート
-    tasks.sort((a, b) => a.priority.compareTo(b.priority));
-
-
-    // ここから下はそのままのコード
-    return ListView.builder(
-      itemCount: tasks.length,
-      itemBuilder: (context, index) {
-        // タスクを表示するウィジェットを返す
-        return TaskTile(index: taskProvider.tasks.indexOf(tasks[index]));
+    return ReorderableListView(
+      onReorder: (oldIndex, newIndex) {
+        taskProvider.reorderTasks(oldIndex, newIndex); // タスクの並び替えを実行
       },
+      children: tasks
+          .map((task) => TaskTile(
+        task: task,
+        index: taskProvider.tasks.indexOf(task),
+        key: ValueKey(task),
+      ))
+          .toList(),
     );
   }
-
-
 }

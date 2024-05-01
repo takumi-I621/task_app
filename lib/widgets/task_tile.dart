@@ -1,103 +1,69 @@
+// lib/widgets/task_tile.dart
+
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
+import '../models/task.dart';
 import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
 
-class TaskTile extends StatefulWidget {
+class TaskTile extends StatelessWidget {
+  final Task task;
   final int index;
 
-  TaskTile({required this.index});
-
-  @override
-  _TaskTileState createState() => _TaskTileState();
-}
-
-class _TaskTileState extends State<TaskTile> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _animation;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 500),
-    );
-    _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  const TaskTile({required this.task, required this.index, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final taskProvider = Provider.of<TaskProvider>(context);
-    final task = taskProvider.tasks[widget.index];
-
-    return GestureDetector(
-      onTap: () {
-        if (!task.isCompleted) {
-          _controller.reset();
-          _controller.forward();
-        }
+    return Dismissible(
+      key: Key(task.name),
+      confirmDismiss: (direction) async {
+        return await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Delete Task'),
+              content: Text('Are you sure you want to delete this task?'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text('Delete'),
+                ),
+              ],
+            );
+          },
+        );
       },
-      child: AnimatedBuilder(
-        animation: _animation,
-        builder: (context, child) {
-          return Slidable(
-            actionPane: SlidableDrawerActionPane(),
-            actionExtentRatio: 0.25,
-            child: Container(
-              child: ListTile(
-                title: Text(
-                  task.name,
-                ),
-                leading: Checkbox(
-                  value: task.isCompleted,
-                  onChanged: (value) {
-                    taskProvider.toggleTask(widget.index);
-                  },
-                ),
-              ),
-            ),
-            secondaryActions: [
-              IconSlideAction(
-                caption: 'Delete',
-                color: Colors.red,
-                icon: Icons.delete,
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Delete Task'),
-                        content: Text('Are you sure you want to delete this task?'),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              taskProvider.deleteTask(widget.index);
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('Delete'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
-          );
-        },
+      onDismissed: (direction) {
+        final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+        taskProvider.deleteTask(index); // タスクを削除
+      },
+      background: Container(
+        color: Colors.red,
+        alignment: Alignment.centerRight,
+        child: Padding(
+          padding: const EdgeInsets.only(right: 20.0),
+          child: Icon(
+            Icons.delete,
+            color: Colors.white,
+          ),
+        ),
+      ),
+      child: ListTile(
+        title: Text(task.name),
+        leading: Checkbox(
+          value: task.isCompleted,
+          onChanged: (value) {
+            final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+            taskProvider.toggleTask(index); // タスクの完了状態を切り替える
+          },
+        ),
+        trailing: ReorderableDragStartListener(
+          index: index,
+          child: Icon(Icons.drag_handle),
+        ),
       ),
     );
   }
