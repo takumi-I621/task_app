@@ -50,6 +50,13 @@ class ToDoScreen extends StatelessWidget {
                   Navigator.pushNamed(context, '/profile');
                 },
               ),
+              ListTile(
+                title: const Text('History'),
+                onTap: () {
+                  // History画面に遷移
+                  Navigator.pushNamed(context, '/history');
+                },
+              ),
             ],
           ),
         ),
