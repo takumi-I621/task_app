@@ -1,8 +1,10 @@
+// lib/screens/history_screen.dart
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/task_provider.dart';
 
 class HistoryScreen extends StatelessWidget {
-  const HistoryScreen({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -10,7 +12,13 @@ class HistoryScreen extends StatelessWidget {
         title: Text('History'),
       ),
       body: Center(
-        child: Text('History Screen'),
+        child: Consumer<TaskProvider>(
+          builder: (context, taskProvider, _) {
+            // TaskProviderから完了したタスクの数を取得して表示する
+            final completedTaskCount = taskProvider.completedTaskCount();
+            return Text('Completed Tasks: $completedTaskCount');
+          },
+        ),
       ),
     );
   }

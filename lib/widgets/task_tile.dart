@@ -43,14 +43,15 @@ class TaskTile extends StatelessWidget {
       background: Container(
         color: Colors.red,
         alignment: Alignment.centerRight,
-        child: Padding(
-          padding: const EdgeInsets.only(right: 20.0),
-          child: Icon(
-            Icons.delete,
-            color: Colors.white,
-          ),
+        padding: EdgeInsets.only(right: 16.0),
+        child: Icon(
+          Icons.delete,
+          color: Colors.white,
         ),
       ),
+      // 追加：フリックの距離を短くする
+      movementDuration: Duration(milliseconds: 200),
+      direction: DismissDirection.endToStart,
       child: ListTile(
         title: Text(task.name),
         leading: Checkbox(

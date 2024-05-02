@@ -53,4 +53,8 @@ class TaskProvider with ChangeNotifier {
     _tasks.insert(newIndex, task);
     notifyListeners();
   }
+  // TaskProviderクラスにcompletedTaskCountメソッドを追加して、完了したタスクの数を集計する
+  int completedTaskCount() {
+    return _tasks.where((task) => task.isCompleted).length;
+  }
 }
