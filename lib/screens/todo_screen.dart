@@ -1,13 +1,29 @@
-// lib/screens/todo_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
 import '../widgets/task_tile.dart';
-import 'add_task_screen.dart';
 
-class ToDoScreen extends StatelessWidget {
-  const ToDoScreen({Key? key});
+class ToDoScreen extends StatefulWidget {
+  const ToDoScreen({Key? key}) : super(key: key);
+
+  @override
+  _ToDoScreenState createState() => _ToDoScreenState();
+}
+
+class _ToDoScreenState extends State<ToDoScreen> {
+  late TextEditingController _taskController;
+
+  @override
+  void initState() {
+    super.initState();
+    _taskController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _taskController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +76,6 @@ class ToDoScreen extends StatelessWidget {
             ],
           ),
         ),
-
         body: TabBarView(
           children: [
             _buildTaskList(context, false), // 実行中タスクのリストを表示
@@ -69,10 +84,7 @@ class ToDoScreen extends StatelessWidget {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AddTaskScreen()),
-            );
+            _showAddTaskDialog(context); // タスクを追加するダイアログを表示
           },
           child: const Icon(Icons.add),
         ),
@@ -83,8 +95,7 @@ class ToDoScreen extends StatelessWidget {
   // タスクリストを表示するウィジェット
   Widget _buildTaskList(BuildContext context, bool completed) {
     final taskProvider = Provider.of<TaskProvider>(context);
-    final tasks =
-    taskProvider.tasks.where((task) => task.isCompleted == completed).toList();
+    final tasks = taskProvider.tasks.where((task) => task.isCompleted == completed).toList();
 
     return ReorderableListView(
       onReorder: (oldIndex, newIndex) {
@@ -97,6 +108,41 @@ class ToDoScreen extends StatelessWidget {
         key: ValueKey(task),
       ))
           .toList(),
+    );
+  }
+
+  // タスクを追加するダイアログを表示
+  void _showAddTaskDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Add Task'),
+          content: TextField(
+            controller: _taskController,
+            decoration: InputDecoration(hintText: 'Enter task name'),
+            autofocus: true,
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // ダイアログを閉じる
+                _taskController.clear(); // テキストフィールドをクリア
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+                taskProvider.addTask(_taskController.text); // タスクを追加
+                Navigator.of(context).pop(); // ダイアログを閉じる
+                _taskController.clear(); // テキストフィールドをクリア
+              },
+              child: Text('Add'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
