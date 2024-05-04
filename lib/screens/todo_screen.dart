@@ -15,6 +15,12 @@ class _ToDoScreenState extends State<ToDoScreen> {
   String? _selectedCategory; // 選択されたカテゴリを保持する変数
   final List<String> _categories = ['仕事', '家事', '個人', 'その他']; // カテゴリのリスト
 
+  // カテゴリボタンの状態を管理する変数
+  bool isWorkSelected = false;
+  bool isHouseworkSelected = false;
+  bool isPersonalSelected = false;
+  bool isOtherSelected = false;
+
   @override
   void initState() {
     super.initState();
@@ -29,7 +35,6 @@ class _ToDoScreenState extends State<ToDoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('②Building ToDoScreen'); // ビルドメソッドが呼び出されたことを確認
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -129,35 +134,29 @@ class _ToDoScreenState extends State<ToDoScreen> {
                 decoration: InputDecoration(hintText: 'Enter task name'),
                 autofocus: true,
               ),
-              SizedBox(height: 16),
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 8.0,
-                children: _categories.map((category) {
-                  print('③Category: $category, Selected: ${_selectedCategory == category}'); // 選択されたカテゴリが正しく表示されることを確認
-                  return GestureDetector(
-                    onTap: () {
-                      print('①Category tapped: $category'); // onTapが呼び出されたことを確認
-                      setState(() {
-                        _selectedCategory = category == _selectedCategory ? null : category; // タップで選択・選択解除
-                      });
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0), // サイズを変更
-                      margin: EdgeInsets.all(4.0),
-                      decoration: BoxDecoration(
-                        color: _selectedCategory == category ? Colors.blue : null,
-                        borderRadius: BorderRadius.circular(20.0),
-                        border: Border.all(color: Colors.grey),
-                      ),
-                      child: Text(
-                        category,
-                        style: TextStyle(fontSize: 14),
+              SizedBox(height: 8),
+              Row(
+                children: _categories.take(4).map((category) {
+                  return Expanded(
+                    child: SizedBox( // ボタンのサイズを均一にするためにSizedBoxを使用
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _onCategoryButtonTap(category);
+                        },
+                        style: ElevatedButton.styleFrom(primary: _getButtonColor(category)),
+                        child: FittedBox( // 名称に応じてフォントサイズを可変にする
+                          fit: BoxFit.contain,
+                          child: Text(
+                            category,
+                            textAlign: TextAlign.center, // 横書きで収まるようにする
+                          ),
+                        ),
                       ),
                     ),
                   );
                 }).toList(),
-              ),
+              )
             ],
           ),
           actions: <Widget>[
@@ -183,5 +182,42 @@ class _ToDoScreenState extends State<ToDoScreen> {
         );
       },
     );
+  }
+
+  // カテゴリボタンのタップ時の処理
+  void _onCategoryButtonTap(String category) {
+    setState(() {
+      // 選択されたカテゴリに応じて状態を切り替える
+      switch (category) {
+        case '仕事':
+          isWorkSelected = !isWorkSelected;
+          break;
+        case '家事':
+          isHouseworkSelected = !isHouseworkSelected;
+          break;
+        case '個人':
+          isPersonalSelected = !isPersonalSelected;
+          break;
+        case 'その他':
+          isOtherSelected = !isOtherSelected;
+          break;
+      }
+    });
+  }
+
+  // カテゴリボタンのスタイル
+  Color _getButtonColor(String category) {
+    switch (category) {
+      case '仕事':
+        return isWorkSelected ? Colors.blue : Colors.transparent;
+      case '家事':
+        return isHouseworkSelected ? Colors.blue : Colors.transparent;
+      case '個人':
+        return isPersonalSelected ? Colors.blue : Colors.transparent;
+      case 'その他':
+        return isOtherSelected ? Colors.blue : Colors.transparent;
+      default:
+        return Colors.transparent;
+    }
   }
 }
