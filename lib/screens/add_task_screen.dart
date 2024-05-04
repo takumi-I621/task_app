@@ -28,7 +28,7 @@ class AddTaskScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 if (taskName.isNotEmpty) {
-                  Provider.of<TaskProvider>(context, listen: false).addTask(taskName);
+                  Provider.of<TaskProvider>(context, listen: false).addTask(taskName, category: '');
                   Navigator.of(context).pop(); // ボタンを押した後、画面を閉じる
                 }
               },

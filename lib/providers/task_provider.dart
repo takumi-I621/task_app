@@ -12,7 +12,7 @@ class TaskProvider with ChangeNotifier {
   bool get darkMode => _darkMode; // ダークモードの状態を取得
 
   // タスクを追加するメソッド
-  void addTask(String name) {
+  void addTask(String name, {required String category}) {
     _tasks.add(Task(name: name, isCompleted: false, priority: _tasks.length)); // タスクを追加
     notifyListeners(); // リスナーに変更を通知
   }
