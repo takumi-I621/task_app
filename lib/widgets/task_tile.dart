@@ -54,15 +54,21 @@ class TaskTile extends StatelessWidget {
       direction: DismissDirection.endToStart,
       child: ListTile(
         title: Text(task.name),
+        subtitle: Text(task.category), // カテゴリ情報をサブタイトルとして表示
+        trailing: Row( // 右側に並び替え用アイコンを配置するためのRowウィジェットを追加
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ReorderableDragStartListener(
+              index: index,
+              child: Icon(Icons.drag_handle),
+            ),
+          ],
+        ),
         leading: Checkbox(
           value: task.isCompleted,
           onChanged: (value) {
             taskProvider.toggleTask(index); // 修正：taskProviderを使用してタスクの完了状態を切り替える
           },
-        ),
-        trailing: ReorderableDragStartListener(
-          index: index,
-          child: Icon(Icons.drag_handle),
         ),
       ),
     );
