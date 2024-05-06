@@ -1,13 +1,33 @@
-// lib/screens/todo_screen.dart
+// lib/screen/todo_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
 import '../widgets/task_tile.dart';
-import 'add_task_screen.dart';
 
-class ToDoScreen extends StatelessWidget {
-  const ToDoScreen({Key? key});
+class ToDoScreen extends StatefulWidget {
+  const ToDoScreen({Key? key}) : super(key: key);
+
+  @override
+  _ToDoScreenState createState() => _ToDoScreenState();
+}
+
+class _ToDoScreenState extends State<ToDoScreen> {
+  late TextEditingController _taskController;
+  String? _selectedCategory = "その他";
+  final List<String> _categories = ['仕事', '家事', '個人', 'その他'];
+
+  @override
+  void initState() {
+    super.initState();
+    _taskController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _taskController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,10 +70,16 @@ class ToDoScreen extends StatelessWidget {
                   Navigator.pushNamed(context, '/profile');
                 },
               ),
+              ListTile(
+                title: const Text('History'),
+                onTap: () {
+                  // History画面に遷移
+                  Navigator.pushNamed(context, '/history');
+                },
+              ),
             ],
           ),
         ),
-
         body: TabBarView(
           children: [
             _buildTaskList(context, false), // 実行中タスクのリストを表示
@@ -62,10 +88,7 @@ class ToDoScreen extends StatelessWidget {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AddTaskScreen()),
-            );
+            _showAddTaskDialog(context); // タスクを追加するダイアログを表示
           },
           child: const Icon(Icons.add),
         ),
@@ -76,8 +99,9 @@ class ToDoScreen extends StatelessWidget {
   // タスクリストを表示するウィジェット
   Widget _buildTaskList(BuildContext context, bool completed) {
     final taskProvider = Provider.of<TaskProvider>(context);
-    final tasks =
-    taskProvider.tasks.where((task) => task.isCompleted == completed).toList();
+    var tasks = taskProvider.tasks
+        .where((task) => task.isCompleted == completed)
+        .toList();
 
     return ReorderableListView(
       onReorder: (oldIndex, newIndex) {
@@ -88,8 +112,69 @@ class ToDoScreen extends StatelessWidget {
         task: task,
         index: taskProvider.tasks.indexOf(task),
         key: ValueKey(task),
+        taskProvider: taskProvider, // TaskTileにTaskProviderを渡す
       ))
           .toList(),
+    );
+  }
+// タスクを追加するダイアログを表示
+  void _showAddTaskDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder( // 追加: ダイアログ内でもsetStateが使えるようにする
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Add Task'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _taskController,
+                    decoration: InputDecoration(hintText: 'Enter task name'),
+                    autofocus: true,
+                  ),
+                  SizedBox(height: 8),
+                  DropdownButton<String>(
+                    value: _selectedCategory,
+                    onChanged: (String? newValue) {
+                      setState(() { // 修正: 内部でsetStateを使用して更新を反映
+                        _selectedCategory = newValue;
+                      });
+                    },
+                    items: _categories.map<DropdownMenuItem<String>>((String category) {
+                      return DropdownMenuItem<String>(
+                        value: category,
+                        child: Text(category),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _taskController.clear();
+                  },
+                  child: Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_taskController.text.isNotEmpty) {
+                      final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+                      taskProvider.addTask(_taskController.text, category: _selectedCategory ?? 'その他'); // カテゴリも追加
+                      Navigator.of(context).pop();
+                      _taskController.clear();
+                    }
+                  },
+                  child: Text('Add'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

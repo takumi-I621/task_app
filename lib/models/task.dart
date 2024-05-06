@@ -2,8 +2,12 @@
 
 class Task {
   final String name;
-  bool isCompleted;
-  final int priority;
+  bool isCompleted; // late修飾子を削除し、通常の初期化に変更
+  final String? category;
 
-  Task({required this.name, required this.isCompleted, required this.priority});
+  Task({
+    required this.name,
+    required this.isCompleted, // late修飾子を削除し、通常の初期化に変更
+    this.category, required int priority,
+  });
 }
