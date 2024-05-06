@@ -1,4 +1,4 @@
-// lib/screens/todo_screen.dart
+// lib/screen/todo_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,8 +14,8 @@ class ToDoScreen extends StatefulWidget {
 
 class _ToDoScreenState extends State<ToDoScreen> {
   late TextEditingController _taskController;
-  String? _selectedCategory; // 選択されたカテゴリを保持する変数
-  final List<String> _categories = ['仕事', '家事', '個人', 'その他']; // カテゴリのリスト
+  String? _selectedCategory = "その他";
+  final List<String> _categories = ['仕事', '家事', '個人', 'その他'];
 
   @override
   void initState() {
@@ -117,61 +117,62 @@ class _ToDoScreenState extends State<ToDoScreen> {
           .toList(),
     );
   }
-
 // タスクを追加するダイアログを表示
   void _showAddTaskDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Add Task'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _taskController,
-                decoration: InputDecoration(hintText: 'Enter task name'),
-                autofocus: true,
+        return StatefulBuilder( // 追加: ダイアログ内でもsetStateが使えるようにする
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Add Task'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _taskController,
+                    decoration: InputDecoration(hintText: 'Enter task name'),
+                    autofocus: true,
+                  ),
+                  SizedBox(height: 8),
+                  DropdownButton<String>(
+                    value: _selectedCategory,
+                    onChanged: (String? newValue) {
+                      setState(() { // 修正: 内部でsetStateを使用して更新を反映
+                        _selectedCategory = newValue;
+                      });
+                    },
+                    items: _categories.map<DropdownMenuItem<String>>((String category) {
+                      return DropdownMenuItem<String>(
+                        value: category,
+                        child: Text(category),
+                      );
+                    }).toList(),
+                  ),
+                ],
               ),
-              SizedBox(height: 8),
-              DropdownButton<String>(
-                value: _selectedCategory ?? _categories.firstWhere((category) => true), // デフォルトのカテゴリを指定
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedCategory = newValue;
-                  });
-                },
-                items: _categories
-                    .map<DropdownMenuItem<String>>((String category) {
-                  return DropdownMenuItem<String>(
-                    value: category,
-                    child: Text(category),
-                  );
-                }).toList(),
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _taskController.clear();
-              },
-              child: Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (_taskController.text.isNotEmpty) {
-                  final taskProvider =
-                  Provider.of<TaskProvider>(context, listen: false);
-                  taskProvider.addTask(_taskController.text, category: _selectedCategory ?? _categories.first); // カテゴリも追加
-                  Navigator.of(context).pop();
-                  _taskController.clear();
-                }
-              },
-              child: Text('Add'),
-            ),
-          ],
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _taskController.clear();
+                  },
+                  child: Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (_taskController.text.isNotEmpty) {
+                      final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+                      taskProvider.addTask(_taskController.text, category: _selectedCategory ?? 'その他'); // カテゴリも追加
+                      Navigator.of(context).pop();
+                      _taskController.clear();
+                    }
+                  },
+                  child: Text('Add'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
