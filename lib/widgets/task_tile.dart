@@ -8,8 +8,9 @@ import '../providers/task_provider.dart';
 class TaskTile extends StatelessWidget {
   final Task task;
   final int index;
+  final TaskProvider taskProvider; // TaskProviderを受け取るフィールドを追加
 
-  const TaskTile({required this.task, required this.index, Key? key}) : super(key: key);
+  const TaskTile({required this.task, required this.index, Key? key, required this.taskProvider}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +38,7 @@ class TaskTile extends StatelessWidget {
         );
       },
       onDismissed: (direction) {
-        final taskProvider = Provider.of<TaskProvider>(context, listen: false);
-        taskProvider.deleteTask(index); // タスクを削除
+        taskProvider.deleteTask(index); // 修正：taskProviderを使用してタスクを削除
       },
       background: Container(
         color: Colors.red,
@@ -57,8 +57,7 @@ class TaskTile extends StatelessWidget {
         leading: Checkbox(
           value: task.isCompleted,
           onChanged: (value) {
-            final taskProvider = Provider.of<TaskProvider>(context, listen: false);
-            taskProvider.toggleTask(index); // タスクの完了状態を切り替える
+            taskProvider.toggleTask(index); // 修正：taskProviderを使用してタスクの完了状態を切り替える
           },
         ),
         trailing: ReorderableDragStartListener(

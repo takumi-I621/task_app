@@ -13,7 +13,11 @@ class TaskProvider with ChangeNotifier {
 
   // タスクを追加するメソッド
   void addTask(String name, {required String category}) {
-    _tasks.add(Task(name: name, isCompleted: false, priority: _tasks.length)); // タスクを追加
+    _tasks.add(Task(
+        name: name,
+        isCompleted: false,
+        priority: _tasks.length,
+        category: '')); // タスクを追加
     notifyListeners(); // リスナーに変更を通知
   }
 
@@ -53,6 +57,7 @@ class TaskProvider with ChangeNotifier {
     _tasks.insert(newIndex, task);
     notifyListeners();
   }
+
   // TaskProviderクラスにcompletedTaskCountメソッドを追加して、完了したタスクの数を集計する
   int completedTaskCount() {
     return _tasks.where((task) => task.isCompleted).length;

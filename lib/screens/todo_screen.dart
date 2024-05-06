@@ -15,12 +15,6 @@ class _ToDoScreenState extends State<ToDoScreen> {
   String? _selectedCategory; // 選択されたカテゴリを保持する変数
   final List<String> _categories = ['仕事', '家事', '個人', 'その他']; // カテゴリのリスト
 
-  // カテゴリボタンの状態を管理する変数
-  bool isWorkSelected = false;
-  bool isHouseworkSelected = false;
-  bool isPersonalSelected = false;
-  bool isOtherSelected = false;
-
   @override
   void initState() {
     super.initState();
@@ -103,7 +97,9 @@ class _ToDoScreenState extends State<ToDoScreen> {
   // タスクリストを表示するウィジェット
   Widget _buildTaskList(BuildContext context, bool completed) {
     final taskProvider = Provider.of<TaskProvider>(context);
-    final tasks = taskProvider.tasks.where((task) => task.isCompleted == completed).toList();
+    var tasks = taskProvider.tasks
+        .where((task) => task.isCompleted == completed)
+        .toList();
 
     return ReorderableListView(
       onReorder: (oldIndex, newIndex) {
@@ -114,12 +110,13 @@ class _ToDoScreenState extends State<ToDoScreen> {
         task: task,
         index: taskProvider.tasks.indexOf(task),
         key: ValueKey(task),
+        taskProvider: taskProvider, // TaskTileにTaskProviderを渡す
       ))
           .toList(),
     );
   }
 
-  // タスクを追加するダイアログを表示
+// タスクを追加するダイアログを表示
   void _showAddTaskDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -135,28 +132,21 @@ class _ToDoScreenState extends State<ToDoScreen> {
                 autofocus: true,
               ),
               SizedBox(height: 8),
-              Row(
-                children: _categories.take(4).map((category) {
-                  return Expanded(
-                    child: SizedBox( // ボタンのサイズを均一にするためにSizedBoxを使用
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _onCategoryButtonTap(category);
-                        },
-                        style: ElevatedButton.styleFrom(primary: _getButtonColor(category)),
-                        child: FittedBox( // 名称に応じてフォントサイズを可変にする
-                          fit: BoxFit.contain,
-                          child: Text(
-                            category,
-                            textAlign: TextAlign.center, // 横書きで収まるようにする
-                          ),
-                        ),
-                      ),
-                    ),
+              DropdownButton<String>(
+                value: _selectedCategory ?? _categories.firstWhere((category) => true), // デフォルトのカテゴリを指定
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedCategory = newValue;
+                  });
+                },
+                items: _categories
+                    .map<DropdownMenuItem<String>>((String category) {
+                  return DropdownMenuItem<String>(
+                    value: category,
+                    child: Text(category),
                   );
                 }).toList(),
-              )
+              ),
             ],
           ),
           actions: <Widget>[
@@ -170,8 +160,9 @@ class _ToDoScreenState extends State<ToDoScreen> {
             ElevatedButton(
               onPressed: () {
                 if (_taskController.text.isNotEmpty) {
-                  final taskProvider = Provider.of<TaskProvider>(context, listen: false);
-                  taskProvider.addTask(_taskController.text, category: _selectedCategory ?? 'その他'); // カテゴリも追加
+                  final taskProvider =
+                  Provider.of<TaskProvider>(context, listen: false);
+                  taskProvider.addTask(_taskController.text, category: _selectedCategory ?? _categories.first); // カテゴリも追加
                   Navigator.of(context).pop();
                   _taskController.clear();
                 }
@@ -182,42 +173,5 @@ class _ToDoScreenState extends State<ToDoScreen> {
         );
       },
     );
-  }
-
-  // カテゴリボタンのタップ時の処理
-  void _onCategoryButtonTap(String category) {
-    setState(() {
-      // 選択されたカテゴリに応じて状態を切り替える
-      switch (category) {
-        case '仕事':
-          isWorkSelected = !isWorkSelected;
-          break;
-        case '家事':
-          isHouseworkSelected = !isHouseworkSelected;
-          break;
-        case '個人':
-          isPersonalSelected = !isPersonalSelected;
-          break;
-        case 'その他':
-          isOtherSelected = !isOtherSelected;
-          break;
-      }
-    });
-  }
-
-  // カテゴリボタンのスタイル
-  Color _getButtonColor(String category) {
-    switch (category) {
-      case '仕事':
-        return isWorkSelected ? Colors.blue : Colors.transparent;
-      case '家事':
-        return isHouseworkSelected ? Colors.blue : Colors.transparent;
-      case '個人':
-        return isPersonalSelected ? Colors.blue : Colors.transparent;
-      case 'その他':
-        return isOtherSelected ? Colors.blue : Colors.transparent;
-      default:
-        return Colors.transparent;
-    }
   }
 }
