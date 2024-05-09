@@ -12,14 +12,16 @@ class TaskProvider with ChangeNotifier {
   bool get darkMode => _darkMode; // ダークモードの状態を取得
 
   // タスクを追加するメソッド
+// TaskProviderクラスのaddTaskメソッド
   void addTask(String name, {required String category}) {
     _tasks.add(Task(
         name: name,
         isCompleted: false,
         priority: _tasks.length,
-        category: '')); // タスクを追加
+        category: category)); // カテゴリを追加
     notifyListeners(); // リスナーに変更を通知
   }
+
 
   // タスクの完了状態を切り替えるメソッド
   void toggleTask(int index) {
@@ -50,11 +52,16 @@ class TaskProvider with ChangeNotifier {
 
   // タスクの並び替えを行うメソッド
   void reorderTasks(int oldIndex, int newIndex) {
+    Task task = _tasks.removeAt(oldIndex);
     if (newIndex > oldIndex) {
       newIndex -= 1;
     }
-    final Task task = _tasks.removeAt(oldIndex);
-    _tasks.insert(newIndex, task);
+    if (newIndex >= _tasks.length) {
+      _tasks.add(task);
+    } else {
+      _tasks.insert(newIndex, task);
+    }
+    print('Task moved from index $oldIndex to $newIndex');
     notifyListeners();
   }
 

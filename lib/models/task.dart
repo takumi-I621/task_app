@@ -1,13 +1,15 @@
-// lib/models/task.dart
+// models/task.dart
 
 class Task {
   final String name;
-  bool isCompleted; // late修飾子を削除し、通常の初期化に変更
-  final String? category;
+  bool isCompleted;
+  final int priority;
+  final String category; // カテゴリ情報を追加
 
   Task({
     required this.name,
-    required this.isCompleted, // late修飾子を削除し、通常の初期化に変更
-    this.category, required int priority,
+    this.isCompleted = false,
+    required this.priority,
+    required this.category, // カテゴリ情報を受け取るように修正
   });
 }
