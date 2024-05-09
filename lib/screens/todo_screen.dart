@@ -9,12 +9,13 @@ class ToDoScreen extends StatefulWidget {
   const ToDoScreen({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _ToDoScreenState createState() => _ToDoScreenState();
 }
 
 class _ToDoScreenState extends State<ToDoScreen> {
   late TextEditingController _taskController;
-  String? _selectedCategory = "その他";
+  String? _selectedCategory = "仕事";
   final List<String> _categories = ['仕事', '家事', '個人', 'その他'];
 
   @override
@@ -105,7 +106,15 @@ class _ToDoScreenState extends State<ToDoScreen> {
 
     return ReorderableListView(
       onReorder: (oldIndex, newIndex) {
-        taskProvider.reorderTasks(oldIndex, newIndex); // タスクの並び替えを実行
+        if(oldIndex == tasks.length) {
+          if (newIndex >= 0 && newIndex < tasks.length) { // インデックスが範囲内にあるか確認
+            taskProvider.reorderTasks(oldIndex, newIndex); // タスクの並び替えを実行
+          }
+        }else{
+          if (newIndex >= 0 && newIndex <= tasks.length) { // インデックスが範囲内にあるか確認
+            taskProvider.reorderTasks(oldIndex, newIndex); // タスクの並び替えを実行
+          }
+        }
       },
       children: tasks
           .map((task) => TaskTile(
@@ -117,6 +126,31 @@ class _ToDoScreenState extends State<ToDoScreen> {
           .toList(),
     );
   }
+  /*
+  // タスクリストを表示するウィジェット
+  Widget _buildTaskList(BuildContext context, bool completed) {
+    final taskProvider = Provider.of<TaskProvider>(context);
+    var tasks = taskProvider.tasks
+        .where((task) => task.isCompleted == completed)
+        .toList();
+
+    return ReorderableListView(
+      onReorder: (oldIndex, newIndex) {
+        if (newIndex >= 0 && newIndex <= tasks.length) { // インデックスが範囲内にあるか確認
+          taskProvider.reorderTasks(oldIndex, newIndex); // タスクの並び替えを実行
+        }
+      },
+      children: tasks
+          .map((task) => TaskTile(
+        task: task,
+        index: taskProvider.tasks.indexOf(task),
+        key: ValueKey(task),
+        taskProvider: taskProvider, // TaskTileにTaskProviderを渡す
+      ))
+          .toList(),
+    );
+  }
+*/
 // タスクを追加するダイアログを表示
   void _showAddTaskDialog(BuildContext context) {
     showDialog(
@@ -125,16 +159,16 @@ class _ToDoScreenState extends State<ToDoScreen> {
         return StatefulBuilder( // 追加: ダイアログ内でもsetStateが使えるようにする
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Add Task'),
+              title: const Text('Add Task'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
                     controller: _taskController,
-                    decoration: InputDecoration(hintText: 'Enter task name'),
+                    decoration: const InputDecoration(hintText: 'Enter task name'),
                     autofocus: true,
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   DropdownButton<String>(
                     value: _selectedCategory,
                     onChanged: (String? newValue) {
@@ -157,7 +191,7 @@ class _ToDoScreenState extends State<ToDoScreen> {
                     Navigator.of(context).pop();
                     _taskController.clear();
                   },
-                  child: Text('Cancel'),
+                  child: const Text('Cancel'),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -168,7 +202,7 @@ class _ToDoScreenState extends State<ToDoScreen> {
                       _taskController.clear();
                     }
                   },
-                  child: Text('Add'),
+                  child: const Text('Add'),
                 ),
               ],
             );

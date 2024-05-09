@@ -21,16 +21,16 @@ class TaskTile extends StatelessWidget {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Delete Task'),
-              content: Text('Are you sure you want to delete this task?'),
+              title: const Text('Delete Task'),
+              content: const Text('Are you sure you want to delete this task?'),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: Text('Cancel'),
+                  child: const Text('Cancel'),
                 ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: Text('Delete'),
+                  child: const Text('Delete'),
                 ),
               ],
             );
@@ -44,7 +44,7 @@ class TaskTile extends StatelessWidget {
         color: Colors.red,
         alignment: Alignment.centerRight,
         padding: EdgeInsets.only(right: 16.0),
-        child: Icon(
+        child: const Icon(
           Icons.delete,
           color: Colors.white,
         ),
@@ -67,7 +67,30 @@ class TaskTile extends StatelessWidget {
         leading: Checkbox(
           value: task.isCompleted,
           onChanged: (value) {
-            taskProvider.toggleTask(index); // 修正：taskProviderを使用してタスクの完了状態を切り替える
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('確認'),
+                  content: const Text('タスクを完了しますか？'),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // ダイアログを閉じる
+                      },
+                      child: const Text('No'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // ダイアログを閉じる
+                        taskProvider.toggleTask(index); // タスクの完了状態を切り替える
+                      },
+                      child: const Text('Yes'),
+                    ),
+                  ],
+                );
+              },
+            );
           },
         ),
       ),

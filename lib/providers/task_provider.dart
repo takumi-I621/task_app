@@ -52,11 +52,16 @@ class TaskProvider with ChangeNotifier {
 
   // タスクの並び替えを行うメソッド
   void reorderTasks(int oldIndex, int newIndex) {
+    Task task = _tasks.removeAt(oldIndex);
     if (newIndex > oldIndex) {
       newIndex -= 1;
     }
-    final Task task = _tasks.removeAt(oldIndex);
-    _tasks.insert(newIndex, task);
+    if (newIndex >= _tasks.length) {
+      _tasks.add(task);
+    } else {
+      _tasks.insert(newIndex, task);
+    }
+    print('Task moved from index $oldIndex to $newIndex');
     notifyListeners();
   }
 
