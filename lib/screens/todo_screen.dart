@@ -126,37 +126,14 @@ class _ToDoScreenState extends State<ToDoScreen> {
           .toList(),
     );
   }
-  /*
-  // タスクリストを表示するウィジェット
-  Widget _buildTaskList(BuildContext context, bool completed) {
-    final taskProvider = Provider.of<TaskProvider>(context);
-    var tasks = taskProvider.tasks
-        .where((task) => task.isCompleted == completed)
-        .toList();
 
-    return ReorderableListView(
-      onReorder: (oldIndex, newIndex) {
-        if (newIndex >= 0 && newIndex <= tasks.length) { // インデックスが範囲内にあるか確認
-          taskProvider.reorderTasks(oldIndex, newIndex); // タスクの並び替えを実行
-        }
-      },
-      children: tasks
-          .map((task) => TaskTile(
-        task: task,
-        index: taskProvider.tasks.indexOf(task),
-        key: ValueKey(task),
-        taskProvider: taskProvider, // TaskTileにTaskProviderを渡す
-      ))
-          .toList(),
-    );
-  }
-*/
 // タスクを追加するダイアログを表示
   void _showAddTaskDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return StatefulBuilder( // 追加: ダイアログ内でもsetStateが使えるようにする
+        return StatefulBuilder(
+          // 追加: ダイアログ内でもsetStateが使えるようにする
           builder: (context, setState) {
             return AlertDialog(
               title: const Text('Add Task'),
@@ -165,18 +142,21 @@ class _ToDoScreenState extends State<ToDoScreen> {
                 children: [
                   TextField(
                     controller: _taskController,
-                    decoration: const InputDecoration(hintText: 'Enter task name'),
+                    decoration:
+                        const InputDecoration(hintText: 'Enter task name'),
                     autofocus: true,
                   ),
                   const SizedBox(height: 8),
                   DropdownButton<String>(
                     value: _selectedCategory,
                     onChanged: (String? newValue) {
-                      setState(() { // 修正: 内部でsetStateを使用して更新を反映
+                      setState(() {
+                        // 修正: 内部でsetStateを使用して更新を反映
                         _selectedCategory = newValue;
                       });
                     },
-                    items: _categories.map<DropdownMenuItem<String>>((String category) {
+                    items: _categories
+                        .map<DropdownMenuItem<String>>((String category) {
                       return DropdownMenuItem<String>(
                         value: category,
                         child: Text(category),
@@ -196,8 +176,10 @@ class _ToDoScreenState extends State<ToDoScreen> {
                 ElevatedButton(
                   onPressed: () {
                     if (_taskController.text.isNotEmpty) {
-                      final taskProvider = Provider.of<TaskProvider>(context, listen: false);
-                      taskProvider.addTask(_taskController.text, category: _selectedCategory ?? 'その他'); // カテゴリも追加
+                      final taskProvider =
+                          Provider.of<TaskProvider>(context, listen: false);
+                      taskProvider.addTask(_taskController.text,
+                          category: _selectedCategory ?? 'その他'); // カテゴリも追加
                       Navigator.of(context).pop();
                       _taskController.clear();
                     }
@@ -211,5 +193,4 @@ class _ToDoScreenState extends State<ToDoScreen> {
       },
     );
   }
-
 }
