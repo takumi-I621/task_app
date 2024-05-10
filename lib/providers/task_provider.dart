@@ -5,22 +5,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/task.dart';
 
 class TaskProvider with ChangeNotifier {
-  List<Task> _tasks = []; // タスクリスト
+  var _tasks = <Task>[]; // タスクリスト
   bool _darkMode = false; // ダークモードの状態
 
   List<Task> get tasks => _tasks; // タスクリストを取得
   bool get darkMode => _darkMode; // ダークモードの状態を取得
 
-  // タスクを追加するメソッド
 // TaskProviderクラスのaddTaskメソッド
   void addTask(String name, {required String category}) {
     _tasks.add(Task(
-        name: name,
-        isCompleted: false,
-        priority: _tasks.length,
-        category: category)); // カテゴリを追加
+      name: name,
+      isCompleted: false,
+      priority: _tasks.length,
+      category: category,
+      createdDate: DateTime.now(), // createdDateを追加
+    ));
     notifyListeners(); // リスナーに変更を通知
   }
+
 
 
   // タスクの完了状態を切り替えるメソッド

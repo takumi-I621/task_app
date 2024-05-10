@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import '../models/task.dart';
-import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
 
 class TaskTile extends StatelessWidget {
@@ -54,7 +53,17 @@ class TaskTile extends StatelessWidget {
       direction: DismissDirection.endToStart,
       child: ListTile(
         title: Text(task.name),
-        subtitle: Text(task.category), // カテゴリ情報をサブタイトルとして表示
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(task.category), // カテゴリ情報をサブタイトルとして表示
+            Text('作成日: ${task.createdDate.year}'
+                '/${task.createdDate.month}'
+                '/${task.createdDate.day}'
+                ' ${task.createdDate.hour}'
+                ':${task.createdDate.minute}'),
+          ],
+        ),
         trailing: Row( // 右側に並び替え用アイコンを配置するためのRowウィジェットを追加
           mainAxisSize: MainAxisSize.min,
           children: [
