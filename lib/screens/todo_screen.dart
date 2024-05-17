@@ -9,7 +9,6 @@ class ToDoScreen extends StatefulWidget {
   const ToDoScreen({Key? key}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _ToDoScreenState createState() => _ToDoScreenState();
 }
 
@@ -60,21 +59,18 @@ class _ToDoScreenState extends State<ToDoScreen> {
               ListTile(
                 title: const Text('Settings'),
                 onTap: () {
-                  // Setting画面に遷移
                   Navigator.pushNamed(context, '/settings');
                 },
               ),
               ListTile(
                 title: const Text('Profile'),
                 onTap: () {
-                  // Profile画面に遷移
                   Navigator.pushNamed(context, '/profile');
                 },
               ),
               ListTile(
                 title: const Text('History'),
                 onTap: () {
-                  // History画面に遷移
                   Navigator.pushNamed(context, '/history');
                 },
               ),
@@ -83,8 +79,8 @@ class _ToDoScreenState extends State<ToDoScreen> {
         ),
         body: TabBarView(
           children: [
-            _buildTaskList(context, false), // 実行中タスクのリストを表示
-            _buildTaskList(context, true), // 完了タスクのリストを表示
+            _buildReorderableTaskList(context), // 実行中タスクのリストを表示
+            _buildCompletedTaskList(context), // 完了タスクのリストを表示
           ],
         ),
         floatingActionButton: FloatingActionButton(
@@ -97,43 +93,47 @@ class _ToDoScreenState extends State<ToDoScreen> {
     );
   }
 
-  // タスクリストを表示するウィジェット
-  Widget _buildTaskList(BuildContext context, bool completed) {
+  Widget _buildReorderableTaskList(BuildContext context) {
     final taskProvider = Provider.of<TaskProvider>(context);
-    var tasks = taskProvider.tasks
-        .where((task) => task.isCompleted == completed)
-        .toList();
+    var tasks = taskProvider.incompleteTasks;
 
     return ReorderableListView(
+      key: PageStorageKey('IncompleteTasks'),
       onReorder: (oldIndex, newIndex) {
-        if(oldIndex == tasks.length) {
-          if (newIndex >= 0 && newIndex < tasks.length) { // インデックスが範囲内にあるか確認
-            taskProvider.reorderTasks(oldIndex, newIndex); // タスクの並び替えを実行
-          }
-        }else{
-          if (newIndex >= 0 && newIndex <= tasks.length) { // インデックスが範囲内にあるか確認
-            taskProvider.reorderTasks(oldIndex, newIndex); // タスクの並び替えを実行
-          }
+        if (newIndex > oldIndex) {
+          newIndex -= 1;
         }
+        taskProvider.reorderIncompleteTasks(oldIndex, newIndex);
       },
-      children: tasks
-          .map((task) => TaskTile(
+      children: tasks.map((task) => TaskTile(
         task: task,
-        index: taskProvider.tasks.indexOf(task),
-        key: ValueKey(task),
-        taskProvider: taskProvider, // TaskTileにTaskProviderを渡す
-      ))
-          .toList(),
+        index: tasks.indexOf(task),
+        key: ValueKey(task.id), // タスクIDを利用
+        taskProvider: taskProvider,
+      )).toList(),
     );
   }
 
-// タスクを追加するダイアログを表示
+  Widget _buildCompletedTaskList(BuildContext context) {
+    final taskProvider = Provider.of<TaskProvider>(context);
+    var tasks = taskProvider.completedTasks;
+
+    return ListView(
+      key: PageStorageKey('CompletedTasks'),
+      children: tasks.map((task) => TaskTile(
+        task: task,
+        index: tasks.indexOf(task),
+        key: ValueKey(task.id), // タスクIDを利用
+        taskProvider: taskProvider,
+      )).toList(),
+    );
+  }
+
   void _showAddTaskDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
-          // 追加: ダイアログ内でもsetStateが使えるようにする
           builder: (context, setState) {
             return AlertDialog(
               title: const Text('Add Task'),
@@ -143,7 +143,7 @@ class _ToDoScreenState extends State<ToDoScreen> {
                   TextField(
                     controller: _taskController,
                     decoration:
-                        const InputDecoration(hintText: 'Enter task name'),
+                    const InputDecoration(hintText: 'Enter task name'),
                     autofocus: true,
                   ),
                   const SizedBox(height: 8),
@@ -151,7 +151,6 @@ class _ToDoScreenState extends State<ToDoScreen> {
                     value: _selectedCategory,
                     onChanged: (String? newValue) {
                       setState(() {
-                        // 修正: 内部でsetStateを使用して更新を反映
                         _selectedCategory = newValue;
                       });
                     },
@@ -177,9 +176,9 @@ class _ToDoScreenState extends State<ToDoScreen> {
                   onPressed: () {
                     if (_taskController.text.isNotEmpty) {
                       final taskProvider =
-                          Provider.of<TaskProvider>(context, listen: false);
+                      Provider.of<TaskProvider>(context, listen: false);
                       taskProvider.addTask(_taskController.text,
-                          category: _selectedCategory ?? 'その他'); // カテゴリも追加
+                          category: _selectedCategory ?? 'その他');
                       Navigator.of(context).pop();
                       _taskController.clear();
                     }

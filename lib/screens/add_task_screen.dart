@@ -2,10 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
 
-class AddTaskScreen extends StatelessWidget {
+class AddTaskScreen extends StatefulWidget {
+  @override
+  _AddTaskScreenState createState() => _AddTaskScreenState();
+}
+
+class _AddTaskScreenState extends State<AddTaskScreen> {
+  final TextEditingController _taskNameController = TextEditingController();
+  String _selectedCategory = "その他";
+
+  @override
+  void dispose() {
+    _taskNameController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    String taskName = '';
+    final categories = ['仕事', '家事', '個人', 'その他']; // カテゴリのオプション
 
     return Scaffold(
       appBar: AppBar(
@@ -17,19 +31,31 @@ class AddTaskScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
-              onChanged: (value) {
-                taskName = value;
-              },
+              controller: _taskNameController,
               decoration: InputDecoration(
                 labelText: 'Enter task name',
               ),
             ),
+            DropdownButton<String>(
+              value: _selectedCategory,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedCategory = newValue ?? 'その他';
+                });
+              },
+              items: categories.map<DropdownMenuItem<String>>((String category) {
+                return DropdownMenuItem<String>(
+                  value: category,
+                  child: Text(category),
+                );
+              }).toList(),
+            ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                if (taskName.isNotEmpty) {
-                  Provider.of<TaskProvider>(context, listen: false).addTask(taskName, category: '');
-                  Navigator.of(context).pop(); // ボタンを押した後、画面を閉じる
+                if (_taskNameController.text.isNotEmpty) {
+                  Provider.of<TaskProvider>(context, listen: false).addTask(_taskNameController.text, category: _selectedCategory);
+                  Navigator.of(context).pop();
                 }
               },
               child: Text('Add Task'),
@@ -40,43 +66,3 @@ class AddTaskScreen extends StatelessWidget {
     );
   }
 }
-
-// タスクの件数を表示するウィジェット
-class TaskCountWidget extends StatelessWidget {
-  final String label;
-  final int count;
-
-  TaskCountWidget({required this.label, required this.count});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Text('$label: $count Tasks'),
-    );
-  }
-}
-
-class TaskScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final taskProvider = Provider.of<TaskProvider>(context);
-    final activeTaskCount = taskProvider.tasks.where((task) => !task.isCompleted).length;
-    final completedTaskCount = taskProvider.tasks.where((task) => task.isCompleted).length;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Tasks'),
-        actions: [
-          TaskCountWidget(label: 'Active Tasks', count: activeTaskCount),
-          TaskCountWidget(label: 'Completed Tasks', count: completedTaskCount),
-        ],
-      ),
-      body: Center(
-        child: Text('Task List'),
-      ),
-    );
-  }
-}
-
-
