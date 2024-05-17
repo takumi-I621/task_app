@@ -14,7 +14,7 @@ class TaskTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      key: Key(task.name),
+      key: Key(task.id.toString()),
       confirmDismiss: (direction) async {
         return await showDialog(
           context: context,
@@ -37,7 +37,7 @@ class TaskTile extends StatelessWidget {
         );
       },
       onDismissed: (direction) {
-        taskProvider.deleteTask(index); // 修正：taskProviderを使用してタスクを削除
+        taskProvider.deleteTask(task.id); // 修正：taskProviderを使用してタスクを削除
       },
       background: Container(
         color: Colors.red,
@@ -75,31 +75,33 @@ class TaskTile extends StatelessWidget {
         ),
         leading: Checkbox(
           value: task.isCompleted,
-          onChanged: (value) {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text('確認'),
-                  content: const Text('タスクを完了しますか？'),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // ダイアログを閉じる
-                      },
-                      child: const Text('No'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // ダイアログを閉じる
-                        taskProvider.toggleTask(index); // タスクの完了状態を切り替える
-                      },
-                      child: const Text('Yes'),
-                    ),
-                  ],
-                );
-              },
-            );
+          onChanged: (bool? value) {
+            if (value != null) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('確認'),
+                    content: const Text('タスクを完了しますか？'),
+                    actions: <Widget>[
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // ダイアログを閉じる
+                        },
+                        child: const Text('No'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop(); // ダイアログを閉じる
+                          taskProvider.toggleTask(task.id); // タスクのIDを使って完了状態を切り替える
+                        },
+                        child: const Text('Yes'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            }
           },
         ),
       ),
