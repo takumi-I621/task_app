@@ -64,12 +64,14 @@ class TaskTile extends StatelessWidget {
                 ':${task.createdDate.minute}'),
           ],
         ),
-        trailing: Row( // 右側に並び替え用アイコンを配置するためのRowウィジェットを追加
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ReorderableDragStartListener(
-              index: index,
-              child: Icon(Icons.drag_handle),
+        //task.isCompketedがnullならアイコンをnullにする。
+        trailing: task.isCompleted ? null :
+          Row( // 右側に並び替え用アイコンを配置するためのRowウィジェットを追加
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ReorderableDragStartListener(
+                index: index,
+                child: Icon(Icons.drag_handle),
             ),
           ],
         ),
