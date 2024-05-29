@@ -97,20 +97,26 @@ class _ToDoScreenState extends State<ToDoScreen> {
     final taskProvider = Provider.of<TaskProvider>(context);
     var tasks = taskProvider.incompleteTasks;
 
-    return ReorderableListView(
-      key: PageStorageKey('IncompleteTasks'),
-      onReorder: (oldIndex, newIndex) {
-        if (newIndex > oldIndex) {
-          newIndex -= 1;
-        }
-        taskProvider.reorderIncompleteTasks(oldIndex, newIndex);
-      },
-      children: tasks.map((task) => TaskTile(
-        task: task,
-        index: tasks.indexOf(task),
-        key: ValueKey(task.id), // タスクIDを利用
-        taskProvider: taskProvider,
-      )).toList(),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 70.0), // フローティングアクションボタンに重ならないようにpaddingを設定
+      child: ReorderableListView.builder(
+        key: PageStorageKey('IncompleteTasks'),
+        itemCount: tasks.length,
+        onReorder: (oldIndex, newIndex) {
+          if (newIndex > oldIndex) {
+            newIndex -= 1;
+          }
+          taskProvider.reorderIncompleteTasks(oldIndex, newIndex);
+        },
+        itemBuilder: (context, index) {
+          return TaskTile(
+            task: tasks[index],
+            index: index,
+            key: ValueKey(tasks[index].id), // タスクIDを利用
+            taskProvider: taskProvider,
+          );
+        },
+      ),
     );
   }
 
@@ -118,14 +124,20 @@ class _ToDoScreenState extends State<ToDoScreen> {
     final taskProvider = Provider.of<TaskProvider>(context);
     var tasks = taskProvider.completedTasks;
 
-    return ListView(
-      key: PageStorageKey('CompletedTasks'),
-      children: tasks.map((task) => TaskTile(
-        task: task,
-        index: tasks.indexOf(task),
-        key: ValueKey(task.id), // タスクIDを利用
-        taskProvider: taskProvider,
-      )).toList(),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 70.0), // フローティングアクションボタンに重ならないようにpaddingを設定
+      child: ListView.builder(
+        key: PageStorageKey('CompletedTasks'),
+        itemCount: tasks.length,
+        itemBuilder: (context, index) {
+          return TaskTile(
+            task: tasks[index],
+            index: index,
+            key: ValueKey(tasks[index].id), // タスクIDを利用
+            taskProvider: taskProvider,
+          );
+        },
+      ),
     );
   }
 
