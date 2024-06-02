@@ -2,26 +2,55 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 import '../models/task.dart';
 
 class TaskProvider with ChangeNotifier {
   List<Task> _completedTasks = [];
   List<Task> _incompleteTasks = [];
   bool _darkMode = false;
+  String _timeZone = 'UTC';
 
   List<Task> get completedTasks => _completedTasks;
   List<Task> get incompleteTasks => _incompleteTasks;
   bool get darkMode => _darkMode;
+  String get timeZone => _timeZone;
+
+  TaskProvider() {
+    _initializeTimeZone();
+  }
+
+  Future<void> _initializeTimeZone() async {
+    tz.initializeTimeZones();
+    await loadTimeZone();
+  }
+
+  // タイムゾーンを設定するメソッド
+  void setTimeZone(String timeZone) async {
+    _timeZone = timeZone;
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('timeZone', timeZone);
+    notifyListeners();
+  }
+
+  // タイムゾーンを読み込むメソッド
+  Future<void> loadTimeZone() async {
+    final prefs = await SharedPreferences.getInstance();
+    _timeZone = prefs.getString('timeZone') ?? 'UTC';
+    notifyListeners();
+  }
 
   // タスクの追加メソッド
   void addTask(String name, {required String category}) {
+    final location = tz.getLocation(_timeZone);
     _incompleteTasks.add(Task(
       id: DateTime.now().millisecondsSinceEpoch,
       name: name,
       isCompleted: false,
       priority: _incompleteTasks.length,
       category: category,
-      createdDate: DateTime.now(),
+      createdDate: tz.TZDateTime.now(location), // タイムゾーンを考慮して日付を設定
     ));
     notifyListeners();
   }
