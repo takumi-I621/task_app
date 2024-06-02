@@ -64,12 +64,14 @@ class TaskTile extends StatelessWidget {
                 ':${task.createdDate.minute}'),
           ],
         ),
-        trailing: Row( // 右側に並び替え用アイコンを配置するためのRowウィジェットを追加
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ReorderableDragStartListener(
-              index: index,
-              child: Icon(Icons.drag_handle),
+        //task.isCompketedがnullならアイコンをnullにする。
+        trailing: task.isCompleted ? null :
+          Row( // 右側に並び替え用アイコンを配置するためのRowウィジェットを追加
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ReorderableDragStartListener(
+                index: index,
+                child: Icon(Icons.drag_handle),
             ),
           ],
         ),
@@ -82,7 +84,7 @@ class TaskTile extends StatelessWidget {
                 builder: (BuildContext context) {
                   return AlertDialog(
                     title: const Text('確認'),
-                    content: const Text('タスクを完了しますか？'),
+                    content: Text(task.isCompleted ? 'タスクを未完了にしますか？' : 'タスクを完了しますか？'),
                     actions: <Widget>[
                       TextButton(
                         onPressed: () {
