@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:intl/intl.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import '../models/task.dart';
 
 class TaskProvider with ChangeNotifier {
@@ -26,6 +28,17 @@ class TaskProvider with ChangeNotifier {
     await loadTimeZone();
   }
 
+  Future<String> _getDefaultTimeZone() async {
+    // Get the default time zone from the device
+    var now = DateTime.now();
+    var offset = now.timeZoneOffset;
+    var hours = offset.inHours;
+    var minutes = offset.inMinutes.remainder(60);
+    var sign = hours >= 0 ? '+' : '-';
+    var formattedOffset = '$sign${hours.abs().toString().padLeft(2, '0')}:${minutes.abs().toString().padLeft(2, '0')}';
+    return 'GMT$formattedOffset';
+  }
+
   // タイムゾーンを設定するメソッド
   void setTimeZone(String timeZone) async {
     _timeZone = timeZone;
@@ -37,7 +50,7 @@ class TaskProvider with ChangeNotifier {
   // タイムゾーンを読み込むメソッド
   Future<void> loadTimeZone() async {
     final prefs = await SharedPreferences.getInstance();
-    _timeZone = prefs.getString('timeZone') ?? 'UTC';
+    _timeZone = prefs.getString('timeZone') ?? await _getDefaultTimeZone();
     notifyListeners();
   }
 
