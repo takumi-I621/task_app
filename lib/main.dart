@@ -19,7 +19,11 @@ class MyApp extends StatelessWidget {
         builder: (context, taskProvider, child) {
           return MaterialApp(
             title: 'ToDo App', // アプリのタイトル
-            theme: taskProvider.darkMode ? ThemeData.dark() : ThemeData.light(), // ダークモードのテーマを適用
+            theme: ThemeData(
+              fontFamily: 'NotoSansJP-Regular', // フォントを指定
+              brightness: taskProvider.darkMode ? Brightness.dark : Brightness.light,
+              //taskProvider.darkMode ? ThemeData.dark() : ThemeData.light(), // ダークモードのテーマを適用
+            ),
             routes: {
               '/': (context) => ToDoScreen(), // メイン画面
               '/settings': (context) => SettingsScreen(), // 設定画面

@@ -14,12 +14,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late String _selectedTimeZone;
   late List<DropdownMenuItem<String>> _timeZoneItems;
 
+
   @override
   void initState() {
     super.initState();
-    tz.initializeTimeZones();
+    //tz.initializeTimeZones();
     final taskProvider = Provider.of<TaskProvider>(context, listen: false);
     _selectedTimeZone = taskProvider.timeZone;
+
 
     // タイムゾーンのリストを初期化
     _timeZoneItems = tz.timeZoneDatabase.locations.keys.map<DropdownMenuItem<String>>((String value) {
